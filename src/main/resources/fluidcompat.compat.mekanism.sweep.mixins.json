@@ -1,0 +1,16 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "me.thanhtnt2.fluidcompat.compat.mekanism.mixin.impl",
+  "plugin": "me.thanhtnt2.fluidcompat.compat.mekanism.mixin.MekanismSweepMixinPlugin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "TileEntityElectricPumpSweepMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

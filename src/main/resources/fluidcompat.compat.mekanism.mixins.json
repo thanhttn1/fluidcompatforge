@@ -1,0 +1,17 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "me.thanhtnt2.fluidcompat.compat.mekanism.mixin.impl",
+  "plugin": "me.thanhtnt2.fluidcompat.compat.mekanism.mixin.MekanismMixinPlugin",
+  "refmap": "fluidcompat.refmap.json",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "TileEntityElectricPumpMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "me.thanhtnt2.fluidcompat.compat.flowingfluids.patches.mixin.impl",
+  "plugin": "me.thanhtnt2.fluidcompat.compat.flowingfluids.patches.mixin.FlowingFluidsPatchesMixinPlugin",
+  "refmap": "fluidcompat.refmap.json",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "FluidUtilsFlowListenerMixin",
+    "FlowingFluidsApiNegativeRemovalMixin",
+    "FluidUtilsEraseOnlyFluidBlocksMixin",
+    "LiquidBlockInteractionShortcutMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

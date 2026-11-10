@@ -1,0 +1,43 @@
+modLoader="javafml"
+loaderVersion="${forge_loader_version_range}"
+license="${mod_license}"
+
+[[mods]]
+modId="${mod_id}"
+version="${version}"
+displayName="${mod_name}"
+authors="${mod_author}"
+description='''${mod_description}'''
+credits='''Flowing Fluids by Traben (GNU LGPL 3.0), required and not bundled. See CREDITS.md for every mod Fluid Compat works with.'''
+
+# The mixin configs are named in the jar manifest (MixinConfigs), the way that is known to work on Forge 1.20.1.
+
+[[dependencies.${mod_id}]]
+modId="forge"
+mandatory=true
+versionRange="[47,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="minecraft"
+mandatory=true
+versionRange="${minecraft_version_range}"
+ordering="NONE"
+side="BOTH"
+
+# Flowing Fluids is mandatory: without it the game stops at the mod list screen and asks for it
+[[dependencies.${mod_id}]]
+modId="flowing_fluids"
+mandatory=true
+versionRange="[1.0.6,)"
+ordering="AFTER"
+side="BOTH"
+
+# YACL only provides the settings screen; the mod works without it
+[[dependencies.${mod_id}]]
+modId="yet_another_config_lib_v3"
+mandatory=false
+versionRange="[3.6.0,)"
+ordering="AFTER"
+side="CLIENT"

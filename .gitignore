@@ -1,0 +1,10 @@
+# gradle
+.gradle/
+build/
+run/
+# idea
+.idea/
+*.iml
+out/
+# Flowing Fluids is LGPL and a required dependency, not part of this repository
+libs/*.jar
