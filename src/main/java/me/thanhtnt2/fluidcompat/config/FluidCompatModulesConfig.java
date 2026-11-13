@@ -34,6 +34,13 @@ public final class FluidCompatModulesConfig {
     public static final ForgeConfigSpec.IntValue ALEXSCAVES_DRAIN_INTAKE_REACH;
     public static final ForgeConfigSpec.BooleanValue ALEXSCAVES_DRAIN_WORLD_EFFECTS;
 
+    public static final ForgeConfigSpec.BooleanValue IE_FINITE_PUMP;
+    public static final ForgeConfigSpec.BooleanValue IE_NO_COBBLE_FOR_FINITE;
+    public static final ForgeConfigSpec.BooleanValue IE_DRAIN_THIN_FLUIDS;
+
+    public static final ForgeConfigSpec.BooleanValue GTCEU_PUMP_ENABLED;
+    public static final ForgeConfigSpec.BooleanValue GTCEU_PUMP_DRAIN_LEFTOVERS;
+
     public static final ForgeConfigSpec.BooleanValue FLUIDLOGGED_ENABLED;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> FLUIDLOGGED_BLOCKS;
     public static final ForgeConfigSpec.BooleanValue FLUIDLOGGED_MAKE_FLUIDLOGGABLE;
@@ -75,13 +82,13 @@ public final class FluidCompatModulesConfig {
 
         BUILDER.push("logging");
         LOG_FILE_ENABLED = BUILDER
-                .comment("Write logs/fluidcompat.log in the game folder (the previous run is kept as fluidcompat-previous.log).")
+                .comment("Write logs/fluidcompat/fluidcompat.log in the game folder (the previous run is kept as fluidcompat-previous.log).")
                 .define("fileEnabled", true);
         LOG_VERBOSE = BUILDER
                 .comment("Also log every fluid intake. Useful for bug reports, noisy otherwise.")
                 .define("verbose", false);
         LOG_DEBUG_MODE = BUILDER
-                .comment("DEBUG MODE: log EVERYTHING into logs/fluidcompat.log: full config dump, every loaded mod,",
+                .comment("DEBUG MODE: log EVERYTHING into logs/fluidcompat/fluidcompat.log: full config dump, every loaded mod,",
                         "every fluid intake (no throttling) and every block update of pipes. Files can get very large.",
                         "Pipe update tracing only starts after a game restart.")
                 .define("debugMode", false);
@@ -180,6 +187,34 @@ public final class FluidCompatModulesConfig {
         ALEXSCAVES_DRAIN_WORLD_EFFECTS = BUILDER
                 .comment("Play the Drain's own sound and particles (a network message of Alex's Caves) when it works.")
                 .define("worldEffects", true);
+        BUILDER.pop();
+
+        BUILDER.push("immersive_engineering");
+        IE_FINITE_PUMP = BUILDER
+                .comment("Make the Immersive Engineering Fluid Pump finite. Its infinite-water rule (two source blocks next to the pump "
+                        + "give 1000 mB for free) is switched off for finite fluids and the pump drains the pond with its own area search "
+                        + "instead, so the world pays for every bucket. Needs a game restart.")
+                .define("finitePump", true);
+        IE_NO_COBBLE_FOR_FINITE = BUILDER
+                .comment("Do not let the pump put cobblestone where it drained a finite fluid. IE has its own switches for this "
+                        + "(server config pump_placeCobble and a per-pump toggle); with Flowing Fluids the cobblestone only hides the "
+                        + "drained space, and it would also replace any thin layer still left in that block.")
+                .define("noCobbleForFiniteFluids", true);
+        IE_DRAIN_THIN_FLUIDS = BUILDER
+                .comment("Let the pump also drain thin Flowing Fluids layers (partly filled blocks), which are not source blocks and "
+                        + "which IE's pump ignores. Each thin block gives exactly the levels it holds.")
+                .define("drainThinFluids", true);
+        BUILDER.pop();
+
+        BUILDER.push("gtceu_pump");
+        GTCEU_PUMP_ENABLED = BUILDER
+                .comment("Needs GregTech CEu Modern. Lets the electric Pump drain what its own search cannot see: thin Flowing Fluids "
+                        + "layers, which are not source blocks. The world pays for every level the pump receives.")
+                .define("enabled", true);
+        GTCEU_PUMP_DRAIN_LEFTOVERS = BUILDER
+                .comment("When the pump has no source block left to take, sweep the thin water around its pump head "
+                        + "(within sweep.reach) and give the pump exactly the levels the world gave up.")
+                .define("drainLeftovers", true);
         BUILDER.pop();
 
         BUILDER.push("fluidlogged");

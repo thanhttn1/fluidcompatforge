@@ -3,11 +3,6 @@
 An unofficial intermediary compatibility mod that helps **Flowing Fluids** understand other mods better.
 This is the Forge 1.20.1 line. It is a separate project from the NeoForge 1.21.1 line and has its own version numbers.
 
-**Status of version 1.3.1:** the Seawater Pump keeps running on thin Flowing Fluids water, the Alex's Caves Drain
-no longer starves when thin water stops short of it, and a new optional Fluidlogged module floods listed blocks
-(the Copper Valve by default) from the water next to them. 1.3.0 ran in a game (Drain and Seawater Pump hooks reached,
-all five mixin configs loaded).
-
 What it contains:
 
 - the Fluid Compat API and core (the Flowing Fluids drain backend, the Vanilla fallback backend, config, own log file);
@@ -25,6 +20,8 @@ What it contains:
 | Mekanism | 10.4.16.80 (1.20.1) | The Electric Pump removes the water source it pumps (water takes the pickup path Mekanism already uses for lava), and drains thin leftover water, including water that flows in later |
 | Mekanism Elements | 3.0.1 (1.20.1) | The Seawater Pump drains the water source below it for the seawater it makes |
 | Alex's Caves | 2.0.2 (1.20.1) | The Drain moves exactly the fluid it takes: it drains through Flowing Fluids and pours out only the levels it removed, instead of counting every thin layer as a full block. It also takes fluid from a few blocks around the cell above it, so thin water that stops short of it still gets drained |
+| Immersive Engineering | 10.2.0-183 (1.20.1) | The Fluid Pump stops making free water (its infinite rule is off for finite fluids), drains the pond with its own area search including thin layers, and no longer puts cobblestone where it drained a finite fluid |
+| GregTech CEu Modern | 7.5.3 (1.20.1) | The electric Pump drains the thin layers its source-block search cannot see, once its source blocks are gone, and gives its tank exactly the levels the world gave up |
 | Fluidlogged | 2.0.1-beta.2 (1.20.1) | Optional. Floods the blocks you list (the Alex's Caves Copper Valve by default) from the Flowing Fluids water next to them, thin layers included, taking exactly that water out of the world |
 
 ## The sweep guard

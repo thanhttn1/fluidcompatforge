@@ -1,5 +1,31 @@
 # Changelog (Forge 1.20.1 line)
 
+## 1.4.0
+
+- Changed: the log files moved into their own folder, `logs/fluidcompat/` (`fluidcompat.log`, `fluidcompat-previous.log`
+  and, after a rollover, `fluidcompat-rolled.log`; same names, same behaviour). Files left directly in `logs/` by older
+  versions are not touched.
+- New: Immersive Engineering compat (10.2.0, Fluid Pump). IE's pump gave 1000 mB of water for free whenever the source
+  block next to it had two source neighbours, and its area search skipped every fluid that can turn into a source, which is
+  water, so it never drained a pond (a model of the rule made 74,000 buckets from nothing in 300 ponds). For finite fluids both
+  now treat water as an ordinary fluid, so the pump's own area search drains the pond and the world pays for every bucket.
+  Thin Flowing Fluids layers, which the pump ignored, are drained too: each thin block gives exactly the levels it holds
+  (SIMULATE only reports, EXECUTE takes them out of the world through the normal intake, and the pump's tank receives what the
+  world really gave, not what was promised). The cobblestone the pump put where it drained is skipped for finite fluids. IE has
+  its own switches for that (server config `pump_placeCobble` and a per-pump toggle); this one is `noCobbleForFiniteFluids`
+  and is on by default. All IE hooks are all or nothing (a guard checks every call they use), fall back to the pump's own code
+  when anything throws, and switch themselves off for the session after 5 failures in a row. Config section
+  `immersive_engineering` (`finitePump`, `noCobbleForFiniteFluids`, `drainThinFluids`). Needs a game restart.
+- New: GregTech CEu Modern compat (7.5.3, electric Pump). The pump takes source blocks only (1000 mB each, then the block is
+  set to air), so it walked past Flowing Fluids' thin layers and sat idle beside puddles that never move. When a pump cycle ran
+  and its queue has nothing left, the thin fluid around the pump head is swept through the sweep service and the tank receives
+  exactly the levels the world gave up (125 mB each); the pump pays the same energy as for a bucket. Source blocks keep
+  GregTech's own, already finite, path. Config section `gtceu_pump` (`enabled`, `drainLeftovers`; reach is `sweep.reach`).
+- New in the core: `core.thin.ThinFluidCells`, the thin-layer rule in one place for machines that walk cells themselves (one
+  cell gives exactly the levels it holds, paid through the intake). Machines that cannot walk cells use the sweep service,
+  which was already separate. Nothing in the public API changed.
+- Log: the thin-water hooks of both modules say whether the refmap carries the vanilla methods they need.
+
 ## 1.3.1
 
 - Fixed: the Mekanism Elements Seawater Pump stopped after one or two cycles in an ocean. It only runs while the cell

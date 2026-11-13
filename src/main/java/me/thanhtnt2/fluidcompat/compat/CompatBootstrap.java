@@ -9,6 +9,8 @@ import me.thanhtnt2.fluidcompat.api.event.FluidIntakeEvent;
 import me.thanhtnt2.fluidcompat.compat.alexscaves.AlexsCavesCompatModule;
 import me.thanhtnt2.fluidcompat.compat.flowingfluids.patches.FlowingFluidsPatchesCompatModule;
 import me.thanhtnt2.fluidcompat.compat.fluidlogged.FluidloggedCompatModule;
+import me.thanhtnt2.fluidcompat.compat.gtceu.GtceuCompatModule;
+import me.thanhtnt2.fluidcompat.compat.immersiveengineering.ImmersiveEngineeringCompatModule;
 import me.thanhtnt2.fluidcompat.compat.flowingfluids.probe.FlowingFluidsProbeCompatModule;
 import me.thanhtnt2.fluidcompat.compat.info.InfoCompatModule;
 import me.thanhtnt2.fluidcompat.compat.mekanism.MekanismCompatModule;
@@ -34,7 +36,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
  */
 public final class CompatBootstrap {
 
-    private static final List<String> MODS_TO_REPORT = List.of("forge", "flowing_fluids", "mekanism", "mekanismelements", "alexscaves", "fluidlogged");
+    private static final List<String> MODS_TO_REPORT = List.of("forge", "flowing_fluids", "mekanism", "mekanismelements", "alexscaves", "fluidlogged", "immersiveengineering", "gtceu");
 
     private CompatBootstrap() {
     }
@@ -49,6 +51,8 @@ public final class CompatBootstrap {
         CompatModuleRegistry.register(new MekanismElementsCompatModule());
         CompatModuleRegistry.register(new AlexsCavesCompatModule());
         CompatModuleRegistry.register(new FluidloggedCompatModule());
+        CompatModuleRegistry.register(new ImmersiveEngineeringCompatModule());
+        CompatModuleRegistry.register(new GtceuCompatModule());
     }
 
     public static void onCommonSetup(FMLCommonSetupEvent event) {

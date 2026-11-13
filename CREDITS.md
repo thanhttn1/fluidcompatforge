@@ -4,6 +4,10 @@
   API and patches it with mixins; no Flowing Fluids code or assets are copied.
 - **Alex's Caves** by Alexthe668 and Noonyeyz (its 1.20.1 `mods.toml` says GNU LGPL): one hook on the Drain. Nothing is
   copied; the hook only names a class and a method, and the Drain's sound message is sent by name.
+- **Immersive Engineering** by BluSunrize (Blu's License of Common Sense): the Fluid Pump hooks only name classes, methods and
+  descriptors of the pump and call its own drain method by name. Nothing is copied.
+- **GregTech CEu Modern** by the GregTech CEu team (LGPL-3.0): one hook after the pump cycle; the pump's private state is read
+  by name. Nothing is copied.
 - **Fluidlogged** by Leximon (MIT; the 1.20.1 build credits MoreThanHidden): optional. One hook adds the listed blocks to
   its "can hold a fluid" and "fluid passes through" answers, and its level extension is called by name to store water.
   Nothing is copied.

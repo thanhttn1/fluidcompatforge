@@ -1,0 +1,16 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "me.thanhtnt2.fluidcompat.compat.gtceu.mixin.impl",
+  "plugin": "me.thanhtnt2.fluidcompat.compat.gtceu.mixin.GtceuMixinPlugin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "PumpMachineMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

@@ -20,8 +20,9 @@ import me.thanhtnt2.fluidcompat.config.FluidCompatModulesConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
 
 /**
- * Dedicated log file ({@code <game folder>/logs/fluidcompat.log}) so developers and players can
- * share Fluid Compat's own trail without digging through latest.log.
+ * Dedicated log files ({@code <game folder>/logs/fluidcompat/fluidcompat.log} and {@code fluidcompat-previous.log}) so
+ * developers and players can share Fluid Compat's own trail without digging through latest.log. They live in their own
+ * folder since 1.4.0; the file names are the ones earlier versions used directly in {@code logs/}.
  *
  * <p>Writing is synchronous on purpose: volume is tiny (verbose lines are throttled) and an
  * asynchronous writer could lose the last lines of a crash. Warnings and errors are mirrored to
@@ -29,6 +30,7 @@ import net.minecraftforge.fml.loading.FMLPaths;
  */
 public final class FluidCompatLog {
 
+    private static final String LOG_FOLDER_NAME = "fluidcompat";
     private static final String LOG_FILE_NAME = "fluidcompat.log";
     private static final String PREVIOUS_LOG_FILE_NAME = "fluidcompat-previous.log";
     private static final String ROLLED_LOG_FILE_NAME = "fluidcompat-rolled.log";
@@ -60,7 +62,7 @@ public final class FluidCompatLog {
             }
             initialized = true;
             try {
-                Path logsFolder = FMLPaths.GAMEDIR.get().resolve("logs");
+                Path logsFolder = FMLPaths.GAMEDIR.get().resolve("logs").resolve(LOG_FOLDER_NAME);
                 Files.createDirectories(logsFolder);
                 Path current = logsFolder.resolve(LOG_FILE_NAME);
                 keepPreviousRun(current, logsFolder.resolve(PREVIOUS_LOG_FILE_NAME));

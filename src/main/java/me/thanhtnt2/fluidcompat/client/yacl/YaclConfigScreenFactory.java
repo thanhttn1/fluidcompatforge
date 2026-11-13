@@ -78,6 +78,8 @@ public final class YaclConfigScreenFactory {
                 .group(buildMekanismElementsGroup())
                 .group(buildAlexsCavesGroup())
                 .group(buildFluidloggedGroup())
+                .group(buildImmersiveEngineeringGroup())
+                .group(buildGtceuGroup())
                 .group(buildSweepGroup())
                 .group(buildAutoBalancedGroup())
                 .group(buildFlowingFluidPatchesGroup())
@@ -154,6 +156,27 @@ public final class YaclConfigScreenFactory {
                 .option(slider("alexsCavesDrainFillSpread", FluidCompatModulesConfig.ALEXSCAVES_DRAIN_FILL_SPREAD, 1, 20, 1, installed))
                 .option(slider("alexsCavesDrainReach", FluidCompatModulesConfig.ALEXSCAVES_DRAIN_INTAKE_REACH, 0, 8, 1, installed))
                 .option(toggle("alexsCavesDrainEffects", FluidCompatModulesConfig.ALEXSCAVES_DRAIN_WORLD_EFFECTS, installed))
+                .build();
+    }
+
+    private static OptionGroup buildImmersiveEngineeringGroup() {
+        boolean installed = isLoaded("immersiveengineering");
+        return OptionGroup.createBuilder()
+                .name(Component.translatable("fluidcompat.group.immersiveengineering"))
+                .description(OptionDescription.of(Component.translatable("fluidcompat.group.immersiveengineering.desc")))
+                .option(toggle("ieFinitePump", FluidCompatModulesConfig.IE_FINITE_PUMP, installed))
+                .option(toggle("ieNoCobble", FluidCompatModulesConfig.IE_NO_COBBLE_FOR_FINITE, installed))
+                .option(toggle("ieThinFluids", FluidCompatModulesConfig.IE_DRAIN_THIN_FLUIDS, installed))
+                .build();
+    }
+
+    private static OptionGroup buildGtceuGroup() {
+        boolean installed = isLoaded("gtceu");
+        return OptionGroup.createBuilder()
+                .name(Component.translatable("fluidcompat.group.gtceu"))
+                .description(OptionDescription.of(Component.translatable("fluidcompat.group.gtceu.desc")))
+                .option(toggle("gtceuPumpEnabled", FluidCompatModulesConfig.GTCEU_PUMP_ENABLED, installed))
+                .option(toggle("gtceuPumpLeftovers", FluidCompatModulesConfig.GTCEU_PUMP_DRAIN_LEFTOVERS, installed))
                 .build();
     }
 
