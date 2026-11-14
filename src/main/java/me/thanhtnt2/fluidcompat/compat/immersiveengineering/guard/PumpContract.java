@@ -14,20 +14,18 @@ import org.slf4j.LoggerFactory;
  *
  * <p>The hooks only work together: the infinite rule and the search filter both ask {@code canConvertToSource}, the
  * thin-block stack must come out of the same {@code Utils.drainFluidBlock} calls the pump uses, the tank fill that
- * follows must be the one that receives that stack, and the cobblestone call must be the one after the drain. So the
+ * follows must be the one that receives that stack. (The cobblestone call has its own, stricter check.) So the
  * hooks are switched on only when each of those calls exists exactly as many times as the hooks expect, in the three
  * methods they live in. If an IE update changes the pump, every hook stays off and the log says which count was wrong.
  *
- * <p>Forge 1.20.1 runs with SRG names and the IDE shows Mojang names, so both spellings of the vanilla calls are
- * accepted. IE's own names are never obfuscated. Pure ASM and pure strings: nothing here loads Minecraft.
+ * <p>Forge 1.20.1 runs with SRG names, and the hook names the vanilla {@code getType} call by its SRG id, so that is what
+ * is checked. IE's own names are never obfuscated. Pure ASM and pure strings: nothing here loads Minecraft.
  */
 public final class PumpContract {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("FluidCompat/Mixin");
 
     private static final String FLUID_STATE = "net/minecraft/world/level/material/FluidState";
-    private static final String LEVEL = "net/minecraft/world/level/Level";
-    private static final String BLOCKS = "net/minecraft/world/level/block/Blocks";
     private static final String IE_UTILS = "blusunrize/immersiveengineering/common/util/Utils";
     private static final String FLUID_TANK = "net/minecraftforge/fluids/capability/templates/FluidTank";
     private static final String SEARCH_FLUID = "searchFluid";
@@ -58,14 +56,12 @@ public final class PumpContract {
         }
         String wrong = firstWrongCount(
                 expect("checkAreaTick canConvertToSource", count(area, FLUID_STATE, "canConvertToSource", null), 2),
-                expect("checkAreaTick FluidState.getType", countEither(area, FLUID_STATE, "getType", "m_76152_"), 1),
+                expect("checkAreaTick FluidState.getType (m_76152_)", count(area, FLUID_STATE, "m_76152_", null), 1),
                 expect("checkAreaTick Utils.getRelatedFluid", count(area, IE_UTILS, "getRelatedFluid", null), 1),
                 expect("checkAreaTick Utils.drainFluidBlock", count(area, IE_UTILS, "drainFluidBlock", null), 1),
                 expect("checkAreaTick writes searchFluid", countPutField(area, SEARCH_FLUID) > 0 ? 1 : 0, 1),
                 expect("tickServer Utils.drainFluidBlock", count(tick, IE_UTILS, "drainFluidBlock", null), 2),
                 expect("tickServer FluidTank.fill", count(tick, FLUID_TANK, "fill", null), 2),
-                expect("tickServer Level.setBlockAndUpdate", countEither(tick, LEVEL, "setBlockAndUpdate", "m_46597_"), 1),
-                expect("tickServer reads Blocks.COBBLESTONE", countStatic(tick, BLOCKS, "COBBLESTONE", "f_50652_"), 1),
                 expect("gatherInfiniteFluidFromWorld canConvertToSource", count(gather, FLUID_STATE, "canConvertToSource", null), 1));
         return wrong;
     }
@@ -106,10 +102,6 @@ public final class PumpContract {
         return found;
     }
 
-    private static int countEither(MethodNode method, String owner, String name, String srgName) {
-        return count(method, owner, name, null) + count(method, owner, srgName, null);
-    }
-
     private static int countPutField(MethodNode method, String field) {
         int found = 0;
         for (AbstractInsnNode instruction : method.instructions) {
@@ -120,14 +112,4 @@ public final class PumpContract {
         return found;
     }
 
-    private static int countStatic(MethodNode method, String owner, String name, String srgName) {
-        int found = 0;
-        for (AbstractInsnNode instruction : method.instructions) {
-            if (instruction instanceof FieldInsnNode access && access.getOpcode() == Opcodes.GETSTATIC
-                    && owner.equals(access.owner) && (name.equals(access.name) || srgName.equals(access.name))) {
-                found++;
-            }
-        }
-        return found;
-    }
 }

@@ -65,6 +65,7 @@ mixin {
     config "${mod_id}.compat.fluidlogged.mixins.json"
     config "${mod_id}.compat.immersiveengineering.mixins.json"
     config "${mod_id}.compat.gtceu.mixins.json"
+    config "${mod_id}.compat.immersiveengineering.cobble.mixins.json"
 }
 
 legacyForge {
@@ -158,7 +159,8 @@ jar {
                     "${mod_id}.compat.mekanismelements.thinwater.mixins.json",
                     "${mod_id}.compat.fluidlogged.mixins.json",
                     "${mod_id}.compat.immersiveengineering.mixins.json",
-                    "${mod_id}.compat.gtceu.mixins.json"
+                    "${mod_id}.compat.gtceu.mixins.json",
+                    "${mod_id}.compat.immersiveengineering.cobble.mixins.json"
             ].join(',')
     ])
 }

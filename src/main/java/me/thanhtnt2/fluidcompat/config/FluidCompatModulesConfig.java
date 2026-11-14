@@ -13,6 +13,15 @@ import net.minecraftforge.common.ForgeConfigSpec;
  */
 public final class FluidCompatModulesConfig {
 
+    // Default class names (not block ids) so every block of a pipe family is covered, whatever its id
+    private static final List<String> DEFAULT_PIPE_BLOCK_CLASSES = List.of(
+            "blusunrize.immersiveengineering.common.blocks.metal.FluidPipeBlock",
+            "com.gregtechceu.gtceu.common.block.FluidPipeBlock",
+            "mekanism.common.block.transmitter.BlockMechanicalPipe",
+            "mekanism.common.block.transmitter.BlockPressurizedTube",
+            "mekanism.common.block.transmitter.BlockLogisticalTransporter",
+            "mcjty.xnet.modules.cables.blocks.GenericCableBlock");
+
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
     public static final ForgeConfigSpec.BooleanValue COMPAT_ENABLED;
@@ -33,6 +42,16 @@ public final class FluidCompatModulesConfig {
     public static final ForgeConfigSpec.IntValue ALEXSCAVES_DRAIN_FILL_SPREAD;
     public static final ForgeConfigSpec.IntValue ALEXSCAVES_DRAIN_INTAKE_REACH;
     public static final ForgeConfigSpec.BooleanValue ALEXSCAVES_DRAIN_WORLD_EFFECTS;
+
+    public static final ForgeConfigSpec.BooleanValue FF_PIPES_ENABLED;
+    public static final ForgeConfigSpec.BooleanValue FF_PIPES_NON_DISPLACERS;
+    public static final ForgeConfigSpec.EnumValue<WaterlogFlowOverride> FF_PIPES_WATERLOG_MODE;
+    public static final ForgeConfigSpec.BooleanValue FF_PIPES_ALLOW_EXPERIMENTAL_MODES;
+    public static final ForgeConfigSpec.BooleanValue FF_PIPES_CLEAN_ORPHAN_WATER;
+    public static final ForgeConfigSpec.IntValue FF_PIPES_CLEANUP_INTERVAL_TICKS;
+    public static final ForgeConfigSpec.IntValue FF_PIPES_CLEANUP_CHUNK_RADIUS;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> FF_PIPES_BLOCK_CLASSES;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> FF_PIPES_EXTRA_BLOCKS;
 
     public static final ForgeConfigSpec.BooleanValue IE_FINITE_PUMP;
     public static final ForgeConfigSpec.BooleanValue IE_NO_COBBLE_FOR_FINITE;
@@ -187,6 +206,43 @@ public final class FluidCompatModulesConfig {
         ALEXSCAVES_DRAIN_WORLD_EFFECTS = BUILDER
                 .comment("Play the Drain's own sound and particles (a network message of Alex's Caves) when it works.")
                 .define("worldEffects", true);
+        BUILDER.pop();
+
+        BUILDER.push("flowing_fluids_pipes");
+        FF_PIPES_ENABLED = BUILDER
+                .comment("Teach Flowing Fluids that pipes are special blocks, and clean up the water that gets stuck inside them.")
+                .define("enabled", true);
+        FF_PIPES_NON_DISPLACERS = BUILDER
+                .comment("Register pipes through the Flowing Fluids API as blocks that never push fluid out of their cell.")
+                .define("registerAsNonDisplacers", true);
+        FF_PIPES_WATERLOG_MODE = BUILDER
+                .comment("How Flowing Fluids treats waterlogged blocks (pipes). GLOBAL setting: it also affects slabs, stairs, etc.",
+                        "Applied in memory when a world starts; nothing is written to Flowing Fluids' own config file.",
+                        "  IGNORE (default, safe): pipes neither take nor give water through Flowing Fluids, so they cannot duplicate it.",
+                        "  KEEP_FLOWING_FLUIDS_SETTING: change nothing (Flowing Fluids' own default).",
+                        "  Any other value is EXPERIMENTAL and can duplicate water. It is ignored (IGNORE is used) unless",
+                        "  allowExperimentalWaterlogModes is true.")
+                .defineEnum("waterlogFlowMode", WaterlogFlowOverride.IGNORE);
+        FF_PIPES_ALLOW_EXPERIMENTAL_MODES = BUILDER
+                .comment("DANGEROUS: lets waterlogFlowMode use modes other than IGNORE / KEEP. Can duplicate water. Only for testing.")
+                .define("allowExperimentalWaterlogModes", false);
+        FF_PIPES_CLEAN_ORPHAN_WATER = BUILDER
+                .comment("Remove the water left inside a waterlogged pipe once none of its non-pipe neighbours holds water.",
+                        "Frees water that stays stuck at the end of a pipe after a pond was pumped dry, without copying it.")
+                .define("cleanOrphanPipeWater", true);
+        FF_PIPES_CLEANUP_INTERVAL_TICKS = BUILDER
+                .comment("Ticks between two cleanup passes. Higher = less work, slower cleanup.")
+                .defineInRange("cleanupIntervalTicks", 40, 5, 1200);
+        FF_PIPES_CLEANUP_CHUNK_RADIUS = BUILDER
+                .comment("Only pipes in loaded chunks within this many chunks of a player are cleaned. Lower = less work.")
+                .defineInRange("cleanupChunkRadius", 4, 1, 16);
+        FF_PIPES_BLOCK_CLASSES = BUILDER
+                .comment("Fully qualified Java class names of pipe blocks. Every block that is an instance of one of them is covered.")
+                .defineListAllowEmpty("blockClasses", DEFAULT_PIPE_BLOCK_CLASSES, entry -> entry instanceof String string && !string.isBlank());
+        FF_PIPES_EXTRA_BLOCKS = BUILDER
+                .comment("Extra entries: block ids like \"modid:block\" or block tags like \"#modid:tag\".",
+                        "Datapacks can also add blocks to the tag fluidcompat:fluid_passable_blocks.")
+                .defineListAllowEmpty("extraBlocks", List.of(), entry -> entry instanceof String string && !string.isBlank());
         BUILDER.pop();
 
         BUILDER.push("immersive_engineering");

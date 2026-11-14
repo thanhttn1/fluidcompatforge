@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  * {@code Fluids.WATER}. The hook answers those two questions, so it is only right while each is asked exactly once and
  * the type is still compared with {@code Fluids.WATER}.
  *
- * <p>Forge 1.20.1 runs with SRG names and the IDE shows Mojang names, so both spellings are accepted. Pure ASM and
+ * <p>The hook names the two vanilla calls by their SRG ids, which is what a real game has, so those are checked. Pure ASM and
  * pure strings: nothing here loads Minecraft.
  */
 public final class SeawaterWaterCheckShape {
@@ -28,9 +28,7 @@ public final class SeawaterWaterCheckShape {
     private static final String UPDATE_DESCRIPTOR = "()V";
     private static final String FLUID_STATE = "net/minecraft/world/level/material/FluidState";
     private static final String FLUIDS = "net/minecraft/world/level/material/Fluids";
-    private static final String IS_SOURCE_MOJANG = "isSource";
     private static final String IS_SOURCE_SRG = "m_76170_";
-    private static final String GET_TYPE_MOJANG = "getType";
     private static final String GET_TYPE_SRG = "m_76152_";
     private static final String WATER_MOJANG = "WATER";
     private static final String WATER_SRG = "f_76193_";
@@ -62,9 +60,9 @@ public final class SeawaterWaterCheckShape {
         int waterReads = 0;
         for (AbstractInsnNode instruction : update.instructions) {
             if (instruction instanceof MethodInsnNode call && FLUID_STATE.equals(call.owner)) {
-                if (IS_SOURCE_MOJANG.equals(call.name) || IS_SOURCE_SRG.equals(call.name)) {
+                if (IS_SOURCE_SRG.equals(call.name)) {
                     isSourceCalls++;
-                } else if (GET_TYPE_MOJANG.equals(call.name) || GET_TYPE_SRG.equals(call.name)) {
+                } else if (GET_TYPE_SRG.equals(call.name)) {
                     getTypeCalls++;
                 }
             } else if (instruction instanceof FieldInsnNode field && field.getOpcode() == Opcodes.GETSTATIC

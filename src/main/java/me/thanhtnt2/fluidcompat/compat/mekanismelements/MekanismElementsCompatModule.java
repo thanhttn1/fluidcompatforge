@@ -64,31 +64,9 @@ public final class MekanismElementsCompatModule implements CompatModule {
         if (CompatMixinState.isApplied(thinWaterId)) {
             FluidCompatLog.info("[mekanism_elements] Seawater Pump thin water hook allowed: the pump's water check has the expected "
                     + "shape. The first cycle on a thin layer logs 'kept running' if Mixin really injected it");
-            reportThinWaterRefmap();
             return;
         }
         FluidCompatLog.warn("[mekanism_elements] Seawater Pump thin water hook is NOT allowed (see the "
                 + "[mekanism_elements_thin_water] line of this log); the pump stops as soon as the water below it is thin");
-    }
-
-    // The two vanilla calls the hook redirects need their SRG ids in the refmap, or Mixin cannot find them in a real game
-    private static void reportThinWaterRefmap() {
-        String refmap = readRefmap();
-        boolean mapsIsSource = refmap != null && refmap.contains("m_76170_");
-        boolean mapsGetType = refmap != null && refmap.contains("m_76152_");
-        FluidCompatLog.info("[mekanism_elements] refmap carries FluidState.isSource (m_76170_): {}, FluidState.getType (m_76152_): {}",
-                mapsIsSource, mapsGetType);
-        if (!mapsIsSource || !mapsGetType) {
-            FluidCompatLog.warn("[mekanism_elements] refmap lacks a FluidState method: in a real game Mixin cannot place the "
-                    + "thin water hook, and the pump stops once the water below it is no longer a full source");
-        }
-    }
-
-    private static String readRefmap() {
-        try (java.io.InputStream stream = MekanismElementsCompatModule.class.getResourceAsStream("/fluidcompat.refmap.json")) {
-            return stream == null ? null : new String(stream.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
-        } catch (java.io.IOException unreadable) {
-            return null;
-        }
     }
 }

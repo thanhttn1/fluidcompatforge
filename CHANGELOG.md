@@ -1,70 +1,73 @@
 # Changelog (Forge 1.20.1 line)
 
+Versioning: `1.X.0` for a big update (new mod support), `1.X.Y` for a small update or fix.
+
+## 1.4.1
+
+* **Fixed: the Immersive Engineering Fluid Pump kept putting cobblestone where it emptied a block.** IE 1.20.1 has no
+  setting to turn that off. The hook is now written exactly as the game's own code names the call (it no longer
+  depends on the game's name mapping), and it has its own, stricter code check: the pump must still simulate the drain,
+  check the tank, drain for real, place the cobblestone and fill the tank, in that order, or the hook switches itself
+  off with a log line. It skips the cobblestone when the block held a finite fluid a moment ago, and also when the pump
+  is working on a finite fluid at all (its work list can be older than the water, which keeps moving).
+  * Switch: `immersive_engineering.noCobbleForFiniteFluids` (default true).
+* **Fixed: water stuck at the end of a pipe.** When a pump sat in a pond with a pipe attached and the pond dropped to
+  the pipe, the water inside the waterlogged pipe stayed there until the pipe was broken. Fluid Compat now has the
+  submerged pipes module: pipes (Immersive Engineering, GregTech and Mekanism fluid pipes, plus anything you add) are
+  registered with Flowing Fluids as blocks that never push water out of their cell, Flowing Fluids' waterlog flow mode is
+  set to IGNORE in memory (nothing is written to its config file), and the water left inside a waterlogged pipe is
+  removed once none of its non-pipe neighbours holds water. Water is only removed there, never created. Only pipes
+  near players are checked, a few chunks per tick, and the work shrinks while the server lags.
+  * Section `flowing_fluids_pipes`: `enabled`, `registerAsNonDisplacers`, `waterlogFlowMode`, `cleanOrphanPipeWater`,
+    `cleanupIntervalTicks`, `cleanupChunkRadius`, `blockClasses`, `extraBlocks`; also in the "Mod Compat List" tab.
+    Datapacks can add blocks to the tag `fluidcompat:fluid_passable_blocks`.
+* The thin water hook of the Mekanism Elements Seawater Pump uses the same exact naming, for the same reason.
+* The log no longer says anything about the game's name mapping; "hook allowed" means the code check passed and
+  "for the first time" means the game really used the hook.
+
 ## 1.4.0
 
-- Changed: the log files moved into their own folder, `logs/fluidcompat/` (`fluidcompat.log`, `fluidcompat-previous.log`
-  and, after a rollover, `fluidcompat-rolled.log`; same names, same behaviour). Files left directly in `logs/` by older
-  versions are not touched.
-- New: Immersive Engineering compat (10.2.0, Fluid Pump). IE's pump gave 1000 mB of water for free whenever the source
-  block next to it had two source neighbours, and its area search skipped every fluid that can turn into a source, which is
-  water, so it never drained a pond (a model of the rule made 74,000 buckets from nothing in 300 ponds). For finite fluids both
-  now treat water as an ordinary fluid, so the pump's own area search drains the pond and the world pays for every bucket.
-  Thin Flowing Fluids layers, which the pump ignored, are drained too: each thin block gives exactly the levels it holds
-  (SIMULATE only reports, EXECUTE takes them out of the world through the normal intake, and the pump's tank receives what the
-  world really gave, not what was promised). The cobblestone the pump put where it drained is skipped for finite fluids. IE has
-  its own switches for that (server config `pump_placeCobble` and a per-pump toggle); this one is `noCobbleForFiniteFluids`
-  and is on by default. All IE hooks are all or nothing (a guard checks every call they use), fall back to the pump's own code
-  when anything throws, and switch themselves off for the session after 5 failures in a row. Config section
-  `immersive_engineering` (`finitePump`, `noCobbleForFiniteFluids`, `drainThinFluids`). Needs a game restart.
-- New: GregTech CEu Modern compat (7.5.3, electric Pump). The pump takes source blocks only (1000 mB each, then the block is
-  set to air), so it walked past Flowing Fluids' thin layers and sat idle beside puddles that never move. When a pump cycle ran
-  and its queue has nothing left, the thin fluid around the pump head is swept through the sweep service and the tank receives
-  exactly the levels the world gave up (125 mB each); the pump pays the same energy as for a bucket. Source blocks keep
-  GregTech's own, already finite, path. Config section `gtceu_pump` (`enabled`, `drainLeftovers`; reach is `sweep.reach`).
-- New in the core: `core.thin.ThinFluidCells`, the thin-layer rule in one place for machines that walk cells themselves (one
-  cell gives exactly the levels it holds, paid through the intake). Machines that cannot walk cells use the sweep service,
-  which was already separate. Nothing in the public API changed.
-- Log: the thin-water hooks of both modules say whether the refmap carries the vanilla methods they need.
+* **Changed: the log files moved to `logs/fluidcompat/`** (`fluidcompat.log`, `fluidcompat-previous.log`, and
+  `fluidcompat-rolled.log` after a rollover). Same names, same behaviour. Files that older versions left directly in
+  `logs/` are not touched.
+* **New: Immersive Engineering support (Fluid Pump).**
+  * Its "two source blocks next to the pump give 1000 mB for free" rule is switched off for finite fluids, and its area
+    search no longer skips water, so the pump drains the pond with its own search and the world pays for every bucket.
+  * Thin Flowing Fluids layers, which the pump ignored, are drained too: each thin block gives exactly the levels it
+    holds, and the pump's tank receives what the world really gave.
+  * All hooks work together: the code check looks at every call they use, and if IE changes any of them every hook stays
+    off. A hook that fails falls back to the pump's own code and switches itself off after 5 failures in a row.
+  * Switches in the `immersive_engineering` section: `finitePump`, `noCobbleForFiniteFluids`, `drainThinFluids`.
+* **New: GregTech CEu Modern support (Pump).** The pump only takes source blocks and walked past thin layers. Once its
+  source blocks are gone, the thin water around the pump head is drained and the tank receives exactly what the world
+  gave up. The pump pays the same energy as for a bucket.
+  * Switches in the `gtceu_pump` section: `enabled`, `drainLeftovers` (reach is `sweep.reach`).
+* The thin layer rule for machines that walk blocks themselves is now one shared class.
 
 ## 1.3.1
 
-- Fixed: the Mekanism Elements Seawater Pump stopped after one or two cycles in an ocean. It only runs while the cell
-  below it is a full water source, and every cycle the world pays for its seawater out of that cell, leaving a thin
-  layer. The pump now also accepts a thin water layer (`mekanism_elements_seawater_pump.drainThinWater`, default on).
-  The world is still charged for every unit of seawater, so a dry cell makes the intake come back short and
-  `shortfallBehavior` decides what the pump makes. Own mixin config and guard; a pump without it keeps working as in 1.3.0.
-- Fixed: the Alex's Caves Drain did nothing while thin Flowing Fluids water stopped short of the cell above it, and
-  went to sleep whenever that cell was dry. It now takes fluid from the nearest fluid cell within
-  `alexscaves_drain.intakeReach` blocks (default 3, 0 = original) and, while switched on, keeps checking at a slow
-  rate. Everything it takes is still poured out exactly, nothing more.
-- New: optional Fluidlogged compat (2.0.1-beta.2, 1.20.1). Blocks listed in `fluidlogged.blocks` (block ids or
-  `#tags`, the Alex's Caves Copper Valve by default, applied as soon as the file is saved) are flooded when the
-  connected Flowing Fluids water next to them adds up to one block, thin layers included. Exactly 8 levels are
-  taken out of the world first, all or nothing, then the block is waterlogged (or, without a waterlogged state, filled
-  through Fluidlogged's own storage). A cell that already holds a fluid is never flooded again, so nothing is
-  duplicated. Fluidlogged is also told the listed blocks can hold a fluid (`makeFluidloggable`) and optionally let fluid
-  through (`makePermeable`). Listed blocks are found through a cheap palette check when a chunk loads and when one is
-  placed; only a few are looked at per pass (`floodIntervalTicks`, `maxBlocksPerPass`).
-- Log: every new guard says which part of the target it could not find when it refuses, and every module says "never
-  got a verdict" when its mixin config was not loaded.
+* **Fixed: the Mekanism Elements Seawater Pump stopped after a cycle or two, even in an ocean.** It only runs while the
+  block below it is a full water source, and every cycle the world pays for the seawater out of that block, which then
+  becomes a thin layer. The pump now also accepts a thin water layer. The world still pays for every unit.
+  * Switch: `mekanism_elements_seawater_pump.drainThinWater` (default true).
+* **Fixed: the Alex's Caves Drain starved when thin water stopped short of it.** It takes fluid from the nearest fluid
+  within `alexscaves_drain.intakeReach` blocks (default 3, 0 = original) and keeps checking slowly while it is on.
+* **New: Fluidlogged support (optional).** Blocks you list in `fluidlogged.blocks` (ids or `#tags`, the Alex's Caves
+  Copper Valve by default, applied as soon as you save the file) are flooded when the connected Flowing Fluids water
+  next to them adds up to one block, thin layers included. Exactly that water is taken out of the world first, so
+  nothing is duplicated. Switches: `enabled`, `makeFluidloggable`, `makePermeable`, `floodIntervalTicks`, `maxBlocksPerPass`.
+* Every code check now says which part it could not find when it refuses, and a hook whose config never loaded is
+  reported as such.
 
 ## 1.3.0
 
-- New: Alex's Caves compat (2.0.2). The Drain moved fluid from above it to below it but counted every liquid cell it
-  touched as one bucket and poured whole blocks, so with Flowing Fluids' thin layers it made water (a model of the
-  original code gained water in 261 of 300 random ponds). Now, while the fluid is finite and Flowing Fluids drains
-  it, the Drain plans where the fluid can go first, drains exactly that many levels through Flowing Fluids, and pours
-  exactly what it got. Fluid stored inside waterlogged blocks (a Copper Valve above the Drain) is found through the
-  free-standing water next to it. A Drain that has nothing to move or no room waits four times as long between looks.
-  Anything else (lava with finite lava off, other fluids, Flowing Fluids disabled) keeps the original behaviour.
-  Config section `alexscaves_drain` (`enabled`, `maxLevelsPerCycle`, `intervalTicks`, `fillSpread`, `worldEffects`).
-- Fixed: the 1.2.0 jar listed only two of its four mixin configs. The leftover sweep and the Seawater Pump hook were
-  never loaded, and the log blamed the Mekanism pump ("sweep is NOT allowed (the pump search is not what it
-  expects)") although the guard never ran. All five configs are now in the jar manifest and the build.
-- Log: a hook whose mixin config did not load now says so ("never got a verdict") instead of blaming the target mod,
-  and the sweep guard writes which part of the Mekanism pump it could not find.
-- Sweep guard: accepts a private call compiled as `invokespecial` and any Mekanism owner for the tank insert, so a
-  harmless compiler or typing difference no longer switches the sweep off.
+* **New: Alex's Caves support (Drain).** The original counted every liquid block it touched as one bucket and poured
+  whole blocks, so with thin layers it made water. Now it drains exactly the levels the cells below can hold through
+  Flowing Fluids and pours exactly what it got; the Copper Valve above it still works. Anything else (lava with finite
+  lava off, other fluids) keeps the original behaviour.
+  * Section `alexscaves_drain`: `enabled`, `maxLevelsPerCycle`, `intervalTicks`, `fillSpread`, `worldEffects`.
+* **Fixed (1.2.0): the leftover sweep and the Seawater Pump hook were never loaded** because two of the four mixin
+  configs were missing from the jar manifest. The log blamed the Mekanism pump. All configs are loaded now.
 
 ## 1.2.0
 
@@ -132,3 +135,4 @@ First build of the 1.20.1 line. A skeleton: no machine compat yet.
 
 - `FluidIntakeEvent.Post.getResult()` is `getIntakeResult()` here: Forge's `Event` already declares `getResult()` with
   another return type. Everything else in the public API keeps its name and signature.
+

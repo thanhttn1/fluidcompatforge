@@ -8,6 +8,7 @@ import me.thanhtnt2.fluidcompat.api.compat.CompatStatus;
 import me.thanhtnt2.fluidcompat.api.event.FluidIntakeEvent;
 import me.thanhtnt2.fluidcompat.compat.alexscaves.AlexsCavesCompatModule;
 import me.thanhtnt2.fluidcompat.compat.flowingfluids.patches.FlowingFluidsPatchesCompatModule;
+import me.thanhtnt2.fluidcompat.compat.flowingfluids.pipes.FlowingFluidsPipesCompatModule;
 import me.thanhtnt2.fluidcompat.compat.fluidlogged.FluidloggedCompatModule;
 import me.thanhtnt2.fluidcompat.compat.gtceu.GtceuCompatModule;
 import me.thanhtnt2.fluidcompat.compat.immersiveengineering.ImmersiveEngineeringCompatModule;
@@ -52,6 +53,7 @@ public final class CompatBootstrap {
         CompatModuleRegistry.register(new AlexsCavesCompatModule());
         CompatModuleRegistry.register(new FluidloggedCompatModule());
         CompatModuleRegistry.register(new ImmersiveEngineeringCompatModule());
+        CompatModuleRegistry.register(new FlowingFluidsPipesCompatModule());
         CompatModuleRegistry.register(new GtceuCompatModule());
     }
 

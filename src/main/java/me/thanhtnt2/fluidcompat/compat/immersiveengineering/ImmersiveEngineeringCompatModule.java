@@ -9,6 +9,7 @@ public final class ImmersiveEngineeringCompatModule implements CompatModule {
 
     public static final String ID = "immersiveengineering";
     private static final String VERDICT_ID = "immersiveengineering_pump";
+    private static final String COBBLE_VERDICT_ID = "immersiveengineering_cobble";
     private static final String PUMP_CLASS = "blusunrize.immersiveengineering.common.blocks.metal.FluidPumpBlockEntity";
 
     @Override
@@ -38,6 +39,7 @@ public final class ImmersiveEngineeringCompatModule implements CompatModule {
     @Override
     public void initialize() {
         loadPumpClass();
+        reportCobble();
         if (!CompatMixinState.hasVerdict(VERDICT_ID)) {
             FluidCompatLog.warn("[immersiveengineering] Fluid Pump hooks never got a verdict: their mixin config was not loaded "
                     + "(check that the jar manifest lists fluidcompat.compat.immersiveengineering.mixins.json)");
@@ -50,27 +52,19 @@ public final class ImmersiveEngineeringCompatModule implements CompatModule {
         }
         FluidCompatLog.info("[immersiveengineering] Fluid Pump hooks allowed: the pump code has the expected shape. "
                 + "The first pump operation logs 'hook reached' if Mixin really injected them");
-        reportRefmap();
     }
 
-    // getType and setBlockAndUpdate are vanilla calls: they need their SRG ids in the refmap in a real game
-    private static void reportRefmap() {
-        String refmap = readRefmap();
-        boolean getType = refmap != null && refmap.contains("m_76152_");
-        boolean setBlock = refmap != null && refmap.contains("m_46597_");
-        FluidCompatLog.info("[immersiveengineering] refmap carries FluidState.getType (m_76152_): {}, Level.setBlockAndUpdate (m_46597_): {}",
-                getType, setBlock);
-        if (!getType || !setBlock) {
-            FluidCompatLog.warn("[immersiveengineering] refmap lacks a vanilla method: in a real game Mixin cannot place the "
-                    + "search and cobblestone hooks");
-        }
-    }
-
-    private static String readRefmap() {
-        try (java.io.InputStream stream = ImmersiveEngineeringCompatModule.class.getResourceAsStream("/fluidcompat.refmap.json")) {
-            return stream == null ? null : new String(stream.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
-        } catch (java.io.IOException unreadable) {
-            return null;
+    private static void reportCobble() {
+        if (!CompatMixinState.hasVerdict(COBBLE_VERDICT_ID)) {
+            FluidCompatLog.warn("[immersiveengineering] cobblestone hook never got a verdict: its mixin config was not loaded "
+                    + "(check that the jar manifest lists fluidcompat.compat.immersiveengineering.cobble.mixins.json); "
+                    + "the pump keeps putting cobblestone where it drained");
+        } else if (CompatMixinState.isApplied(COBBLE_VERDICT_ID)) {
+            FluidCompatLog.info("[immersiveengineering] cobblestone hook allowed: the pump's drain, tank and cobblestone steps are as expected. "
+                    + "The first skipped cobblestone logs 'for the first time' if Mixin really injected it");
+        } else {
+            FluidCompatLog.warn("[immersiveengineering] cobblestone hook is NOT allowed (see the [immersiveengineering_cobble] line of this log); "
+                    + "the pump keeps putting cobblestone where it drained");
         }
     }
 }

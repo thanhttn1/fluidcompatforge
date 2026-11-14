@@ -3,6 +3,7 @@ package me.thanhtnt2.fluidcompat.compat.immersiveengineering;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.util.List;
 
 import me.thanhtnt2.fluidcompat.api.FluidCompatApi;
 import me.thanhtnt2.fluidcompat.compat.CompatMixinState;
@@ -43,6 +44,7 @@ public final class IePumpBridge {
 
     private static final String UTILS_CLASS = "blusunrize.immersiveengineering.common.util.Utils";
     private static final String FIRST_USE_HOOK = "immersiveengineering.pump";
+    private static final String FIRST_COBBLE_HOOK = "immersiveengineering.pump.cobble";
     private static final String FIRST_THIN_HOOK = "immersiveengineering.pump.thin";
 
     private static volatile MethodHandle originalDrain;
@@ -169,15 +171,41 @@ public final class IePumpBridge {
     // ------------------------------------------------------------------ cobblestone
 
     /**
-     * Replaces the pump's {@code setBlockAndUpdate(pos, cobblestone)}. Skipped when the pump drained a finite fluid,
-     * so the world is not covered with cobblestone and no thin layer left in that block is deleted.
+     * Called just before the pump takes the block at the end of its work list. Returns that position when its fluid is
+     * finite and the cobblestone that follows must be skipped, otherwise null. The pump works from the end of its list.
      */
-    public static boolean placeCobble(Level level, BlockPos pos, BlockState cobble, Fluid searchFluid) {
+    public static BlockPos finiteDrainTarget(Level level, List<BlockPos> workList) {
         try {
-            if (pumpHooksOn() && FluidCompatModulesConfig.IE_NO_COBBLE_FOR_FINITE.get()
-                    && searchFluid != null && isFinite(searchFluid)) {
-                IePumpHealth.succeeded();
-                return false;
+            if (level == null || workList.isEmpty() || !pumpHooksOn() || !FluidCompatModulesConfig.IE_NO_COBBLE_FOR_FINITE.get()) {
+                return null;
+            }
+            BlockPos target = workList.get(workList.size() - 1);
+            FluidState fluid = level.getFluidState(target);
+            return !fluid.isEmpty() && isFinite(fluid.getType()) ? target.immutable() : null;
+        } catch (RuntimeException | LinkageError error) {
+            IePumpHealth.failed("cobbleTarget", error);
+            return null;
+        }
+    }
+
+    /**
+     * Replaces the pump's {@code setBlockAndUpdate(pos, cobblestone)}. Skipped when the block held a finite fluid a moment
+     * ago, or when the pump is working on a finite fluid at all: its work list is made some time before it is used, and
+     * with Flowing Fluids a thin layer can have flowed away in between, so the pump still "takes" an empty block and puts
+     * cobblestone there. The fluid is not put back: the pond is simply emptier, and Flowing Fluids fills the gap.
+     */
+    public static boolean placeCobble(Level level, BlockPos pos, BlockState cobble, BlockPos finiteTarget, Fluid searchFluid) {
+        try {
+            if (pumpHooksOn() && FluidCompatModulesConfig.IE_NO_COBBLE_FOR_FINITE.get()) {
+                boolean tookFiniteFluidHere = finiteTarget != null && finiteTarget.equals(pos);
+                boolean pumpingFiniteFluid = searchFluid != null && isFinite(searchFluid);
+                if (tookFiniteFluidHere || pumpingFiniteFluid) {
+                    IePumpHealth.succeeded();
+                    if (CompatMixinState.markHookReached(FIRST_COBBLE_HOOK)) {
+                        FluidCompatLog.info("[immersiveengineering] Fluid Pump cobblestone skipped for the first time at {}", pos.toShortString());
+                    }
+                    return false;
+                }
             }
         } catch (RuntimeException | LinkageError error) {
             IePumpHealth.failed("cobble", error);

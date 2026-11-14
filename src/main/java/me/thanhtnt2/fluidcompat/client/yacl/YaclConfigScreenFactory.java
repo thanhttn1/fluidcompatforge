@@ -80,6 +80,7 @@ public final class YaclConfigScreenFactory {
                 .group(buildFluidloggedGroup())
                 .group(buildImmersiveEngineeringGroup())
                 .group(buildGtceuGroup())
+                .group(buildPipesGroup())
                 .group(buildSweepGroup())
                 .group(buildAutoBalancedGroup())
                 .group(buildFlowingFluidPatchesGroup())
@@ -167,6 +168,19 @@ public final class YaclConfigScreenFactory {
                 .option(toggle("ieFinitePump", FluidCompatModulesConfig.IE_FINITE_PUMP, installed))
                 .option(toggle("ieNoCobble", FluidCompatModulesConfig.IE_NO_COBBLE_FOR_FINITE, installed))
                 .option(toggle("ieThinFluids", FluidCompatModulesConfig.IE_DRAIN_THIN_FLUIDS, installed))
+                .build();
+    }
+
+    private static OptionGroup buildPipesGroup() {
+        boolean installed = isLoaded("flowing_fluids");
+        return OptionGroup.createBuilder()
+                .name(Component.translatable("fluidcompat.group.pipes"))
+                .description(OptionDescription.of(Component.translatable("fluidcompat.group.pipes.desc")))
+                .option(toggle("pipesEnabled", FluidCompatModulesConfig.FF_PIPES_ENABLED, installed))
+                .option(toggle("pipesNonDisplacers", FluidCompatModulesConfig.FF_PIPES_NON_DISPLACERS, installed))
+                .option(toggle("pipesCleanOrphans", FluidCompatModulesConfig.FF_PIPES_CLEAN_ORPHAN_WATER, installed))
+                .option(slider("pipesInterval", FluidCompatModulesConfig.FF_PIPES_CLEANUP_INTERVAL_TICKS, 5, 1200, 5, installed))
+                .option(slider("pipesRadius", FluidCompatModulesConfig.FF_PIPES_CLEANUP_CHUNK_RADIUS, 1, 16, 1, installed))
                 .build();
     }
 

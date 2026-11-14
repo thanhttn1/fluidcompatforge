@@ -46,11 +46,16 @@ public final class DebugSnapshot {
     }
 
     private static void logModuleState() {
-        FluidCompatLog.info("mixin allowed [mekanism] = {} [mekanism_sweep] = {} [mekanism_elements] = {} [alexscaves_drain] = {} [mekanism_elements_thin_water] = {} [fluidlogged_lists] = {} [immersiveengineering_pump] = {} [gtceu_pump] = {}",
+        FluidCompatLog.info("mixin allowed [mekanism] = {} [mekanism_sweep] = {} [mekanism_elements] = {} [alexscaves_drain] = {} [mekanism_elements_thin_water] = {} [fluidlogged_lists] = {} [immersiveengineering_pump] = {} [immersiveengineering_cobble] = {} [gtceu_pump] = {}",
                 CompatMixinState.isApplied("mekanism"), CompatMixinState.isApplied("mekanism_sweep"),
                 CompatMixinState.isApplied("mekanism_elements"), CompatMixinState.isApplied("alexscaves_drain"),
                 CompatMixinState.isApplied("mekanism_elements_thin_water"), CompatMixinState.isApplied("fluidlogged_lists"),
-                CompatMixinState.isApplied("immersiveengineering_pump"), CompatMixinState.isApplied("gtceu_pump"));
+                CompatMixinState.isApplied("immersiveengineering_pump"), CompatMixinState.isApplied("immersiveengineering_cobble"),
+                CompatMixinState.isApplied("gtceu_pump"));
+        FluidCompatLog.info("config[flowing_fluids_pipes] enabled={} nonDisplacers={} waterlogMode={} cleanOrphans={} intervalTicks={} chunkRadius={}",
+                FluidCompatModulesConfig.FF_PIPES_ENABLED.get(), FluidCompatModulesConfig.FF_PIPES_NON_DISPLACERS.get(),
+                FluidCompatModulesConfig.FF_PIPES_WATERLOG_MODE.get(), FluidCompatModulesConfig.FF_PIPES_CLEAN_ORPHAN_WATER.get(),
+                FluidCompatModulesConfig.FF_PIPES_CLEANUP_INTERVAL_TICKS.get(), FluidCompatModulesConfig.FF_PIPES_CLEANUP_CHUNK_RADIUS.get());
         FluidCompatLog.info("config[immersive_engineering] finitePump={} noCobble={} thinFluids={}; config[gtceu_pump] enabled={} leftovers={}",
                 FluidCompatModulesConfig.IE_FINITE_PUMP.get(), FluidCompatModulesConfig.IE_NO_COBBLE_FOR_FINITE.get(),
                 FluidCompatModulesConfig.IE_DRAIN_THIN_FLUIDS.get(), FluidCompatModulesConfig.GTCEU_PUMP_ENABLED.get(),
